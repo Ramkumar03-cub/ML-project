@@ -38,13 +38,47 @@
       </nav>
 
       <div class="nav-actions">
-        <span class="badge-status online"><span class="status-dot"></span> ML Engine Active</span>
-        <button id="theme-toggle-btn" class="icon-btn" title="Toggle theme">
+        <span class="badge-status online"><span class="status-dot"></span> <span class="status-text">ML Engine Active</span></span>
+        <button id="theme-toggle-btn" class="icon-btn" title="Toggle theme" aria-label="Toggle theme">
           <i class="fa-solid fa-circle-half-stroke"></i>
+        </button>
+        <button id="mobile-menu-btn" class="icon-btn mobile-only" title="Open navigation menu" aria-label="Open navigation menu">
+          <i class="fa-solid fa-bars"></i>
         </button>
       </div>
     </div>
+
+    <!-- Mobile Drawer Menu -->
+    <div id="mobile-nav-drawer" class="mobile-drawer">
+      <div class="mobile-drawer-header">
+        <div class="brand-group">
+          <div class="brand-logo sm">
+            <i class="fa-solid fa-dna"></i>
+          </div>
+          <span class="brand-title">DiaProfile<span class="gradient-text">.AI</span></span>
+        </div>
+        <button id="mobile-drawer-close" class="icon-btn" aria-label="Close menu">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="mobile-drawer-links">
+        <a href="#discovery-section" class="mobile-nav-link"><i class="fa-solid fa-shapes"></i> Four Archetypes</a>
+        <a href="#assessment-section" class="mobile-nav-link"><i class="fa-solid fa-user-doctor"></i> Patient Assessment</a>
+        <a href="#simulator-section" class="mobile-nav-link"><i class="fa-solid fa-wand-magic-sparkles"></i> 'What-If' Simulator</a>
+        <a href="#pca-section" class="mobile-nav-link"><i class="fa-solid fa-chart-scatter"></i> 2D Cohort Map</a>
+        <a href="#guidelines-section" class="mobile-nav-link"><i class="fa-solid fa-book-medical"></i> Care Guidelines</a>
+        <a href="/api/download-cohort" download class="mobile-nav-link download-link"><i class="fa-solid fa-file-arrow-down"></i> Download Dataset (CSV)</a>
+      </div>
+    </div>
+    <div id="drawer-backdrop" class="drawer-backdrop"></div>
   </header>
+
+  <!-- Mobile Floating Quick Assess Button -->
+  <a href="#assessment-section" id="mobile-fab" class="mobile-fab mobile-only" title="Jump to Patient Assessment" aria-label="Jump to Assessment">
+    <i class="fa-solid fa-stethoscope"></i>
+    <span>Assess</span>
+  </a>
+
 
   <main class="page-container">
     <!-- Hero Section -->
@@ -116,8 +150,11 @@
       <!-- Archetype Benchmark Comparison Table -->
       <div class="benchmark-table-wrapper glass-panel">
         <div class="benchmark-table-header">
-          <h3 class="table-title"><i class="fa-solid fa-table-columns"></i> Side-by-Side Archetype Biomarker Benchmarks</h3>
-          <span class="table-sub">Comparative centroid profiles and pathophysiological signatures</span>
+          <div>
+            <h3 class="table-title"><i class="fa-solid fa-table-columns"></i> Side-by-Side Archetype Biomarker Benchmarks</h3>
+            <span class="table-sub">Comparative centroid profiles and pathophysiological signatures</span>
+          </div>
+          <span class="mobile-swipe-hint mobile-only"><i class="fa-solid fa-arrows-left-right"></i> Swipe table</span>
         </div>
         <div class="table-responsive">
           <table class="benchmark-table">

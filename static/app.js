@@ -772,6 +772,57 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Mobile Navigation Drawer Toggle
+  const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+  const mobileDrawerClose = document.getElementById('mobile-drawer-close');
+  const mobileDrawer = document.getElementById('mobile-nav-drawer');
+  const drawerBackdrop = document.getElementById('drawer-backdrop');
+  const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+
+  function openMobileDrawer() {
+    if (mobileDrawer) mobileDrawer.classList.add('open');
+    if (drawerBackdrop) drawerBackdrop.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeMobileDrawer() {
+    if (mobileDrawer) mobileDrawer.classList.remove('open');
+    if (drawerBackdrop) drawerBackdrop.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  if (mobileMenuBtn) {
+    mobileMenuBtn.addEventListener('click', openMobileDrawer);
+  }
+  if (mobileDrawerClose) {
+    mobileDrawerClose.addEventListener('click', closeMobileDrawer);
+  }
+  if (drawerBackdrop) {
+    drawerBackdrop.addEventListener('click', closeMobileDrawer);
+  }
+  mobileNavLinks.forEach(link => {
+    link.addEventListener('click', closeMobileDrawer);
+  });
+
+  // Mobile FAB Visibility
+  const mobileFab = document.getElementById('mobile-fab');
+  if (mobileFab) {
+    window.addEventListener('scroll', () => {
+      const assessEl = document.getElementById('assessment-section');
+      if (assessEl) {
+        const rect = assessEl.getBoundingClientRect();
+        // Hide FAB when inside assessment form
+        if (rect.top <= 100 && rect.bottom >= 100) {
+          mobileFab.style.opacity = '0';
+          mobileFab.style.pointerEvents = 'none';
+        } else {
+          mobileFab.style.opacity = '1';
+          mobileFab.style.pointerEvents = 'auto';
+        }
+      }
+    }, { passive: true });
+  }
+
   // Print clinical summary handler
   btnPrint.addEventListener('click', () => {
     window.print();
