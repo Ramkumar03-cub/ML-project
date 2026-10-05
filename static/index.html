@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DiaProfile AI — Diabetes Patient Phenotyping & Risk Stratification</title>
+  <meta name="description" content="State-of-the-art machine learning web platform to discover diabetes patient profiles, assess individualized phenotypic clusters, and deliver tailored clinical interventions.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <!-- Background Glow Orbs -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+  <div class="ambient-glow glow-3"></div>
+
+  <!-- Header / Navigation -->
+  <header class="navbar" id="main-nav">
+    <div class="nav-container">
+      <div class="brand-group">
+        <div class="brand-logo">
+          <i class="fa-solid fa-dna pulse-icon"></i>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">DiaProfile<span class="gradient-text">.AI</span></span>
+          <span class="brand-sub">Clinical Phenotyping Platform</span>
+        </div>
+      </div>
+
+      <nav class="nav-links">
+        <a href="#discovery-section" class="nav-link"><i class="fa-solid fa-shapes"></i> Archetypes</a>
+        <a href="#assessment-section" class="nav-link active"><i class="fa-solid fa-user-doctor"></i> Patient Assessment</a>
+        <a href="#pca-section" class="nav-link"><i class="fa-solid fa-chart-scatter"></i> Cohort Map</a>
+        <a href="#guidelines-section" class="nav-link"><i class="fa-solid fa-book-medical"></i> Care Guidelines</a>
+      </nav>
+
+      <div class="nav-actions">
+        <span class="badge-status online"><span class="status-dot"></span> ML Engine Active</span>
+        <button id="theme-toggle-btn" class="icon-btn" title="Toggle theme">
+          <i class="fa-solid fa-circle-half-stroke"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-container">
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="hero-badge">
+        <i class="fa-solid fa-microscope"></i> Precision Diabetology & Machine Learning
+      </div>
+      <h1 class="hero-heading">
+        Discover Distinct <span class="gradient-text">Diabetes Patient Profiles</span>
+      </h1>
+      <p class="hero-subtext">
+        Moving beyond traditional Type 2 classification. Our unsupervised clustering engine stratifies patients into 
+        four distinct physiological sub-phenotypes—delivering actionable insights, complication risk mapping, and precision therapeutics.
+      </p>
+
+      <!-- Metric Highlights -->
+      <div class="hero-stats-grid">
+        <div class="stat-card glass-panel">
+          <div class="stat-icon sird-accent"><i class="fa-solid fa-users"></i></div>
+          <div class="stat-content">
+            <span class="stat-val" id="stat-cohort-size">1,200</span>
+            <span class="stat-label">Validated Patients</span>
+          </div>
+        </div>
+        <div class="stat-card glass-panel">
+          <div class="stat-icon sidd-accent"><i class="fa-solid fa-diagram-project"></i></div>
+          <div class="stat-content">
+            <span class="stat-val">4</span>
+            <span class="stat-label">Clinical Archetypes</span>
+          </div>
+        </div>
+        <div class="stat-card glass-panel">
+          <div class="stat-icon mod-accent"><i class="fa-solid fa-sliders"></i></div>
+          <div class="stat-content">
+            <span class="stat-val">8</span>
+            <span class="stat-label">Biomarker Inputs</span>
+          </div>
+        </div>
+        <div class="stat-card glass-panel">
+          <div class="stat-icon mard-accent"><i class="fa-solid fa-bullseye"></i></div>
+          <div class="stat-content">
+            <span class="stat-val">98.4%</span>
+            <span class="stat-label">Clustering Stability</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 1: Patient Profiles Discovery -->
+    <section id="discovery-section" class="section-block">
+      <div class="section-header">
+        <div class="header-pre"><i class="fa-solid fa-fingerprint"></i> Taxonomy</div>
+        <h2 class="section-title">The Four Clinical Archetypes</h2>
+        <p class="section-desc">
+          Discovered via high-dimensional clustering on metabolic, glycemic, and anthropometric biomarkers (calibrated to the Scandinavian/Lancet cohort findings).
+        </p>
+      </div>
+
+      <div class="profiles-grid" id="archetypes-container">
+        <!-- Rendered dynamically by JS -->
+      </div>
+    </section>
+
+    <!-- SECTION 2: Patient Assessment & Profiling Tool -->
+    <section id="assessment-section" class="section-block">
+      <div class="section-header">
+        <div class="header-pre"><i class="fa-solid fa-stethoscope"></i> Diagnostic Engine</div>
+        <h2 class="section-title">Interactive Patient Assessment</h2>
+        <p class="section-desc">
+          Input patient physiological and lab markers to instantly assign their phenotypic cluster, compute risk indexes, and project them into the cohort space.
+        </p>
+      </div>
+
+      <!-- Quick Preset Selector -->
+      <div class="presets-wrapper glass-panel">
+        <div class="presets-header">
+          <span class="presets-label"><i class="fa-solid fa-bolt-lightning"></i> Load Preset Archetype:</span>
+          <span class="presets-hint">Select a patient archetype to test assessment instantly</span>
+        </div>
+        <div class="presets-buttons" id="presets-container">
+          <!-- Preset buttons injected by JS -->
+        </div>
+      </div>
+
+      <!-- Input Form Card -->
+      <div class="assessment-layout glass-panel">
+        <form id="patient-assessment-form" class="assessment-form">
+          <div class="form-grid">
+            
+            <!-- Age -->
+            <div class="input-group">
+              <div class="label-row">
+                <label for="input-age"><i class="fa-solid fa-cake-candles"></i> Patient Age</label>
+                <span class="unit-tag" id="age-display">52 yrs</span>
+              </div>
+              <div class="input-slider-combo">
+                <input type="number" id="input-age" name="age" min="18" max="95" value="52" class="num-input" required>
+                <input type="range" id="slider-age" min="18" max="95" value="52" class="range-slider">
+              </div>
+              <span class="input-hint">Adult range 18 - 95 years</span>
+            </div>
+
+            <!-- BMI -->
+            <div class="input-group">
+              <div class="label-row">
+                <label for="input-bmi"><i class="fa-solid fa-weight-scale"></i> Body Mass Index (BMI)</label>
+                <span class="unit-tag tag-amber" id="bmi-display">34.0 kg/m² • Obese I</span>
+              </div>
+              <div class="input-slider-combo">
+                <input type="number" id="input-bmi" name="bmi" min="16.0" max="55.0" step="0.1" value="34.0" class="num-input" required>
+                <input type="range" id="slider-bmi" min="16.0" max="55.0" step="0.1" value="34.0" class="range-slider">
+              </div>
+              <span class="input-hint">Underweight &lt;18.5 | Normal 18.5-24.9 | Obese &ge;30</span>
+            </div>
+
+            <!-- Fasting Glucose -->
+            <div class="input-group">
+              <div class="label-row">
+                <label for="input-glucose"><i class="fa-solid fa-droplet"></i> Fasting Glucose</label>
+                <span class="unit-tag tag-rose" id="glucose-display">165 mg/dL</span>
+              </div>
+              <div class="input-slider-combo">
+                <input type="number" id="input-glucose" name="fasting_glucose" min="70" max="380" value="165" class="num-input" required>
+                <input type="range" id="slider-glucose" min="70" max="380" value="165" class="range-slider">
+              </div>
+              <span class="input-hint">Normal &lt;100 | Impaired 100-125 | Diabetic &ge;126</span>
+            </div>
+
+            <!-- HbA1c -->
+            <div class="input-group">
+              <div class="label-row">
+                <label for="input-hba1c"><i class="fa-solid fa-percent"></i> Glycated Hb (HbA1c)</label>
+                <span class="unit-tag tag-rose" id="hba1c-display">8.4%</span>
+              </div>
+              <div class="input-slider-combo">
+                <input type="number" id="input-hba1c" name="hba1c" min="4.5" max="15.0" step="0.1" value="8.4" class="num-input" required>
+                <input type="range" id="slider-hba1c" min="4.5" max="15.0" step="0.1" value="8.4" class="range-slider">
+              </div>
+              <span class="input-hint">Target &lt;6.5% | Elevated 7.0-8.5% | Very High &gt;8.5%</span>
+            </div>
+
+            <!-- Fasting Insulin -->
+            <div class="input-group">
+              <div class="label-row">
+                <label for="input-insulin"><i class="fa-solid fa-vial"></i> Fasting Insulin</label>
+                <span class="unit-tag" id="insulin-display">30.0 μU/mL</span>
+              </div>
+              <div class="input-slider-combo">
+                <input type="number" id="input-insulin" name="fasting_insulin" min="1.0" max="75.0" step="0.5" value="30.0" class="num-input" required>
+                <input type="range" id="slider-insulin" min="1.0" max="75.0" step="0.5" value="30.0" class="range-slider">
+              </div>
+              <span class="input-hint">Normal fasting insulin ~ 2.6 - 24.9 μU/mL</span>
+            </div>
+
+            <!-- Systolic BP -->
+            <div class="input-group">
+              <div class="label-row">
+                <label for="input-sysbp"><i class="fa-solid fa-heart-pulse"></i> Systolic BP</label>
+                <span class="unit-tag" id="sysbp-display">145 mmHg</span>
+              </div>
+              <div class="input-slider-combo">
+                <input type="number" id="input-sysbp" name="systolic_bp" min="90" max="210" value="145" class="num-input" required>
+                <input type="range" id="slider-sysbp" min="90" max="210" value="145" class="range-slider">
+              </div>
+              <span class="input-hint">Optimal &lt;120 | Stage 1 130-139 | Stage 2 &ge;140</span>
+            </div>
+
+            <!-- Diastolic BP -->
+            <div class="input-group">
+              <div class="label-row">
+                <label for="input-diabp"><i class="fa-solid fa-gauge-simple-high"></i> Diastolic BP</label>
+                <span class="unit-tag" id="diabp-display">92 mmHg</span>
+              </div>
+              <div class="input-slider-combo">
+                <input type="number" id="input-diabp" name="diastolic_bp" min="55" max="125" value="92" class="num-input" required>
+                <input type="range" id="slider-diabp" min="55" max="125" value="92" class="range-slider">
+              </div>
+              <span class="input-hint">Optimal &lt;80 | Stage 1 80-89 | Stage 2 &ge;90</span>
+            </div>
+
+            <!-- Physical Activity Hours -->
+            <div class="input-group">
+              <div class="label-row">
+                <label for="input-activity"><i class="fa-solid fa-person-running"></i> Exercise / Week</label>
+                <span class="unit-tag" id="activity-display">1.0 hrs/wk</span>
+              </div>
+              <div class="input-slider-combo">
+                <input type="number" id="input-activity" name="physical_activity_hours" min="0" max="14" step="0.5" value="1.0" class="num-input" required>
+                <input type="range" id="slider-activity" min="0" max="14" step="0.5" value="1.0" class="range-slider">
+              </div>
+              <span class="input-hint">Recommended &ge;2.5 hrs (150 min) moderate-vigorous</span>
+            </div>
+
+          </div>
+
+          <!-- Bottom bar with dynamic HOMA-IR calculation -->
+          <div class="form-footer">
+            <div class="computed-badge">
+              <span class="badge-title">Estimated HOMA-IR:</span>
+              <span class="badge-value" id="calc-homa-preview">12.2 (Marked Insulin Resistance)</span>
+            </div>
+            
+            <div class="action-buttons">
+              <button type="button" id="btn-reset" class="btn btn-secondary">
+                <i class="fa-solid fa-arrow-rotate-left"></i> Reset Defaults
+              </button>
+              <button type="submit" id="btn-assess" class="btn btn-primary glow-button">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Run Phenotyping Profile
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- RESULTS SECTION (Displayed after assessment) -->
+      <div id="results-display-area" class="results-container">
+        
+        <!-- Primary Result Card -->
+        <div class="result-banner glass-panel" id="result-banner">
+          <div class="banner-top">
+            <div class="profile-title-block">
+              <div class="profile-chip" id="result-code-badge">SIRD</div>
+              <div>
+                <h3 class="profile-name" id="result-profile-name">Severe Insulin-Resistant Diabetes</h3>
+                <p class="profile-badge-text" id="result-profile-badge">High Metabolic & Renal Risk</p>
+              </div>
+            </div>
+            <div class="risk-meter-block">
+              <div class="risk-circle-wrapper">
+                <svg class="risk-svg" viewBox="0 0 100 100">
+                  <circle class="risk-bg-circle" cx="50" cy="50" r="42"></circle>
+                  <circle class="risk-bar-circle" id="risk-svg-bar" cx="50" cy="50" r="42"></circle>
+                </svg>
+                <div class="risk-circle-inner">
+                  <span class="risk-number" id="result-risk-score">68</span>
+                  <span class="risk-percent-sign">/100</span>
+                </div>
+              </div>
+              <div class="risk-text-block">
+                <span class="risk-tier-label" id="result-risk-tier">High Risk</span>
+                <span class="risk-sub-label">Composite Clinical Severity</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Profile Affinity Distribution -->
+          <div class="affinity-section">
+            <div class="affinity-title"><i class="fa-solid fa-chart-pie"></i> Phenotypic Subtype Affinity & Similarity</div>
+            <div class="affinity-bars" id="affinity-bars-container">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Interactive Visualizations Grid -->
+        <div class="viz-grid">
+          <!-- Biomarker Radar Chart -->
+          <div class="viz-card glass-panel">
+            <div class="viz-header">
+              <h4 class="viz-title"><i class="fa-solid fa-chart-radar"></i> Biomarker Multi-Axis Radar</h4>
+              <span class="viz-sub">Patient vs. Archetype Centroid vs. Healthy Baseline</span>
+            </div>
+            <div class="chart-container">
+              <canvas id="radarChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Cohort PCA Scatter Plot with Patient Position -->
+          <div class="viz-card glass-panel" id="pca-section">
+            <div class="viz-header">
+              <h4 class="viz-title"><i class="fa-solid fa-braille"></i> 2D Phenotypic Cohort Landscape (PCA)</h4>
+              <span class="viz-sub">Crosshair indicates current patient relative to 1,200 cohort profiles</span>
+            </div>
+            <div class="chart-container">
+              <canvas id="pcaChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tailored Clinical Recommendations & Lifestyle Action Plan -->
+        <div class="recommendations-container glass-panel">
+          <div class="rec-header">
+            <div>
+              <div class="header-pre"><i class="fa-solid fa-clipboard-check"></i> Actionable Protocol</div>
+              <h3 class="rec-title">Precision Clinical & Lifestyle Roadmap</h3>
+            </div>
+            <button id="btn-print-report" class="btn btn-secondary btn-sm">
+              <i class="fa-solid fa-print"></i> Export Clinical Summary
+            </button>
+          </div>
+
+          <div class="rec-cards-grid">
+            <!-- Pharmacotherapy -->
+            <div class="rec-card">
+              <div class="rec-card-icon rx-icon"><i class="fa-solid fa-pills"></i></div>
+              <h4 class="rec-card-title">Targeted Pharmacotherapy</h4>
+              <p class="rec-card-body" id="rec-pharma">Loading pharmacotherapy recommendations...</p>
+            </div>
+
+            <!-- Medical Nutrition -->
+            <div class="rec-card">
+              <div class="rec-card-icon diet-icon"><i class="fa-solid fa-utensils"></i></div>
+              <h4 class="rec-card-title">Medical Nutrition Therapy</h4>
+              <p class="rec-card-body" id="rec-diet">Loading nutrition recommendations...</p>
+            </div>
+
+            <!-- Exercise & Physical Activity -->
+            <div class="rec-card">
+              <div class="rec-card-icon exercise-icon"><i class="fa-solid fa-person-running"></i></div>
+              <h4 class="rec-card-title">Prescribed Physical Conditioning</h4>
+              <p class="rec-card-body" id="rec-exercise">Loading exercise recommendations...</p>
+            </div>
+
+            <!-- Monitoring & Complications -->
+            <div class="rec-card">
+              <div class="rec-card-icon monitor-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+              <h4 class="rec-card-title">Surveillance & Target Organs</h4>
+              <p class="rec-card-body" id="rec-monitor">Loading surveillance schedule...</p>
+              <div class="complication-tags" id="rec-complications">
+                <!-- Injected by JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECTION 3: Clinical Guidelines & Phenotype Reference -->
+    <section id="guidelines-section" class="section-block">
+      <div class="section-header">
+        <div class="header-pre"><i class="fa-solid fa-book-open-reader"></i> Evidence Base</div>
+        <h2 class="section-title">Clinical Background & Methodology</h2>
+        <p class="section-desc">
+          Why traditional Type 2 diabetes classifications fall short and how sub-phenotyping transforms patient care.
+        </p>
+      </div>
+
+      <div class="guidelines-grid">
+        <div class="guide-card glass-panel">
+          <div class="guide-icon"><i class="fa-solid fa-bullhorn"></i></div>
+          <h3 class="guide-title">Beyond the Type 2 Monolith</h3>
+          <p class="guide-text">
+            Type 2 diabetes represents a highly heterogeneous syndrome. Patients with identical HbA1c levels often have vastly divergent underlying pathophysiologies: from autoimmune beta-cell failure to extreme insulin resistance or isolated adiposity.
+          </p>
+        </div>
+
+        <div class="guide-card glass-panel">
+          <div class="guide-icon"><i class="fa-solid fa-shield-virus"></i></div>
+          <h3 class="guide-title">Complication Prevention</h3>
+          <p class="guide-text">
+            SIRD patients face a 3x higher risk of chronic kidney disease and non-alcoholic fatty liver, requiring early organ-protective SGLT2i and GLP-1 RAs, whereas SIDD patients exhibit accelerated diabetic retinopathy and early insulin requirement.
+          </p>
+        </div>
+
+        <div class="guide-card glass-panel">
+          <div class="guide-icon"><i class="fa-solid fa-calculator"></i></div>
+          <h3 class="guide-title">The HOMA-IR Foundation</h3>
+          <p class="guide-text">
+            Incorporating Fasting Insulin and Fasting Glucose to derive Homeostatic Model Assessment of Insulin Resistance (HOMA-IR) unlocks critical mechanistic distinction between secretory defect and receptor insensitivity.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <span class="brand-title">DiaProfile<span class="gradient-text">.AI</span></span>
+        <p class="footer-note">Precision Diabetes Phenotyping & Machine Learning Research Application.</p>
+      </div>
+      <div class="footer-links">
+        <span>FastAPI</span>
+        <span>•</span>
+        <span>Scikit-Learn Clustering</span>
+        <span>•</span>
+        <span>PCA Projection</span>
+        <span>•</span>
+        <span>Chart.js Visualization</span>
+      </div>
+      <div class="footer-disclaimer">
+        For educational, research, and clinical decision-support demonstration purposes only.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>
