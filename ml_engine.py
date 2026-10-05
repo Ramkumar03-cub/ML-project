@@ -324,6 +324,9 @@ class DiabetesProfilingEngine:
             'Physical Inactivity': round(float(max(0, (5.0 - 4.0) / 5.0) * 100), 1)
         }
 
+        # Feature Driver Breakdown (Explainability / Clinical Attribution)
+        feature_drivers = self._calculate_feature_drivers(patient_data, cluster_id)
+
         return {
             'assigned_cluster': cluster_id,
             'cluster_code': meta['code'],
@@ -350,6 +353,7 @@ class DiabetesProfilingEngine:
                 'MOD': similarities[2],
                 'MARD': similarities[3]
             },
+            'feature_drivers': feature_drivers,
             'radar_comparison': {
                 'labels': list(radar_metrics.keys()),
                 'patient_values': list(radar_metrics.values()),
@@ -358,5 +362,110 @@ class DiabetesProfilingEngine:
             }
         }
 
+    def _calculate_feature_drivers(self, patient_data, cluster_id):
+        """
+        Calculates normalized z-score deviations of patient features vs. overall cohort
+        to identify the top driving clinical factors for this patient's profile.
+        """
+        labels_map = {
+            'fasting_insulin': 'Fasting Insulin (Hyperinsulinemia)',
+            'hba1c': 'Glycated Hemoglobin (HbA1c)',
+            'bmi': 'Adiposity / Body Mass Index',
+            'fasting_glucose': 'Fasting Blood Glucose',
+            'systolic_bp': 'Systolic Arterial Pressure',
+            'age': 'Age Factor',
+            'diastolic_bp': 'Diastolic Arterial Pressure',
+            'physical_activity_hours': 'Sedentary Lifestyle Level'
+        }
+
+        drivers = []
+        for feat in FEATURE_NAMES:
+            mean_val = float(self.cohort_df[feat].mean())
+            std_val = float(self.cohort_df[feat].std()) + 1e-5
+            val = float(patient_data[feat])
+            
+            # Directional impact: higher inactivity is worse
+            if feat == 'physical_activity_hours':
+                z = (mean_val - val) / std_val
+            else:
+                z = (val - mean_val) / std_val
+
+            impact_pct = min(100, max(5, int(abs(z) * 35)))
+            status = 'Elevated' if z > 0.5 else ('Low/Deficient' if z < -0.5 else 'Near Population Median')
+
+            drivers.append({
+                'feature': feat,
+                'label': labels_map.get(feat, feat),
+                'patient_value': round(val, 1),
+                'z_score': round(z, 2),
+                'status': status,
+                'impact_pct': impact_pct,
+                'is_primary_driver': abs(z) >= 0.8
+            })
+
+        # Sort by absolute z-score deviation
+        drivers.sort(key=lambda d: abs(d['z_score']), reverse=True)
+        return drivers
+
+    def simulate_intervention(self, base_patient, deltas):
+        """
+        Simulates counterfactual interventions (e.g. lifestyle, medication)
+        and computes trajectory towards phenotype improvement.
+        deltas dict keys: bmi_delta, hba1c_delta, exercise_delta, bp_delta, glucose_delta
+        """
+        proj = dict(base_patient)
+        
+        # Apply deltas safely within clinical limits
+        proj['bmi'] = max(18.5, min(55.0, proj['bmi'] + float(deltas.get('bmi_delta', 0.0))))
+        proj['hba1c'] = max(4.8, min(14.0, proj['hba1c'] + float(deltas.get('hba1c_delta', 0.0))))
+        proj['fasting_glucose'] = max(70.0, min(350.0, proj['fasting_glucose'] + float(deltas.get('glucose_delta', 0.0))))
+        proj['systolic_bp'] = max(95.0, min(200.0, proj['systolic_bp'] + float(deltas.get('bp_delta', 0.0))))
+        proj['physical_activity_hours'] = max(0.0, min(14.0, proj['physical_activity_hours'] + float(deltas.get('exercise_delta', 0.0))))
+        
+        # Correlated insulin sensitivity improvement with weight loss and exercise
+        bmi_drop = float(deltas.get('bmi_delta', 0.0))
+        if bmi_drop < 0:
+            insulin_reduction = abs(bmi_drop) * 1.5
+            proj['fasting_insulin'] = max(3.0, proj['fasting_insulin'] - insulin_reduction)
+
+        # Baseline assessment
+        baseline_res = self.assess_patient(base_patient)
+        # Projected assessment
+        projected_res = self.assess_patient(proj)
+
+        risk_delta = projected_res['risk_score'] - baseline_res['risk_score']
+        
+        return {
+            'baseline': {
+                'cluster_code': baseline_res['cluster_code'],
+                'cluster_name': baseline_res['cluster_name'],
+                'risk_score': baseline_res['risk_score'],
+                'risk_tier': baseline_res['risk_tier'],
+                'risk_color': baseline_res['risk_color'],
+                'pca': baseline_res['pca_coordinates']
+            },
+            'projected': {
+                'cluster_code': projected_res['cluster_code'],
+                'cluster_name': projected_res['cluster_name'],
+                'risk_score': projected_res['risk_score'],
+                'risk_tier': projected_res['risk_tier'],
+                'risk_color': projected_res['risk_color'],
+                'pca': projected_res['pca_coordinates'],
+                'homa_ir': projected_res['homa_ir']
+            },
+            'risk_delta': risk_delta,
+            'percent_risk_reduction': round((abs(risk_delta) / (baseline_res['risk_score'] + 1e-5)) * 100, 1) if risk_delta < 0 else 0.0,
+            'is_phenotype_transitioned': baseline_res['cluster_code'] != projected_res['cluster_code'],
+            'projected_inputs': proj
+        }
+
+    def get_cohort_csv(self):
+        """Exports cohort records formatted as CSV string"""
+        export_df = self.cohort_df.copy()
+        export_df['cluster_code'] = export_df['assigned_cluster'].map(lambda cid: PROFILE_METADATA[cid]['code'])
+        export_df['cluster_name'] = export_df['assigned_cluster'].map(lambda cid: PROFILE_METADATA[cid]['name'])
+        return export_df.to_csv(index=False)
+
 # Global engine instance
 profiling_engine = DiabetesProfilingEngine()
+

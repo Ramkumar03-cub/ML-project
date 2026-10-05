@@ -91,6 +91,12 @@
           </div>
         </div>
       </div>
+
+      <!-- Quick Action Buttons -->
+      <div class="hero-actions-row">
+        <a href="#assessment-section" class="btn btn-primary"><i class="fa-solid fa-stethoscope"></i> Assess Patient Now</a>
+        <a href="/api/download-cohort" download class="btn btn-secondary"><i class="fa-solid fa-file-arrow-down"></i> Download 1,200 Cohort Dataset (CSV)</a>
+      </div>
     </section>
 
     <!-- SECTION 1: Patient Profiles Discovery -->
@@ -105,6 +111,71 @@
 
       <div class="profiles-grid" id="archetypes-container">
         <!-- Rendered dynamically by JS -->
+      </div>
+
+      <!-- Archetype Benchmark Comparison Table -->
+      <div class="benchmark-table-wrapper glass-panel">
+        <div class="benchmark-table-header">
+          <h3 class="table-title"><i class="fa-solid fa-table-columns"></i> Side-by-Side Archetype Biomarker Benchmarks</h3>
+          <span class="table-sub">Comparative centroid profiles and pathophysiological signatures</span>
+        </div>
+        <div class="table-responsive">
+          <table class="benchmark-table">
+            <thead>
+              <tr>
+                <th>Biomarker / Trait</th>
+                <th class="th-sird">SIRD (Severe Insulin-Resistant)</th>
+                <th class="th-sidd">SIDD (Severe Insulin-Deficient)</th>
+                <th class="th-mod">MOD (Mild Obesity-Related)</th>
+                <th class="th-mard">MARD (Mild Age-Related)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Onset Age Range</strong></td>
+                <td>40 - 65 yrs (Mean: 54)</td>
+                <td>25 - 55 yrs (Mean: 42)</td>
+                <td>30 - 60 yrs (Mean: 46)</td>
+                <td>60 - 85+ yrs (Mean: 68)</td>
+              </tr>
+              <tr>
+                <td><strong>Adiposity (BMI kg/m²)</strong></td>
+                <td><span class="badge-table sird-badge">35.5 (Severely Obese)</span></td>
+                <td><span class="badge-table normal-badge">23.2 (Normal / Lean)</span></td>
+                <td><span class="badge-table mod-badge">36.8 (High Adiposity)</span></td>
+                <td><span class="badge-table mard-badge">27.4 (Overweight)</span></td>
+              </tr>
+              <tr>
+                <td><strong>Glycemia (HbA1c / Glucose)</strong></td>
+                <td>8.3% / 168 mg/dL</td>
+                <td><span class="badge-table critical-badge">10.2% / 215 mg/dL</span></td>
+                <td>7.2% / 142 mg/dL</td>
+                <td>6.9% / 136 mg/dL</td>
+              </tr>
+              <tr>
+                <td><strong>Fasting Insulin & HOMA-IR</strong></td>
+                <td><span class="badge-table critical-badge">32.0 μU/mL (HOMA 13.3)</span></td>
+                <td><span class="badge-table normal-badge">4.8 μU/mL (HOMA 2.5)</span></td>
+                <td>16.5 μU/mL (HOMA 5.8)</td>
+                <td>11.2 μU/mL (HOMA 3.8)</td>
+              </tr>
+              <tr>
+                <td><strong>Primary Organ Threat</strong></td>
+                <td>Kidney (DKD) & Liver (NAFLD)</td>
+                <td>Retina (Retinopathy) & DKA</td>
+                <td>Sleep Apnea & Joint Strain</td>
+                <td>Cardiovascular Atherosclerosis</td>
+              </tr>
+              <tr>
+                <td><strong>Core Therapy Target</strong></td>
+                <td>SGLT2i + GLP-1 RA + Metformin</td>
+                <td>Exogenous Insulin Replacement</td>
+                <td>Weight Reduction (GLP-1/GIP)</td>
+                <td>Gentle Glycemia (DPP-4i / Met)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
 
@@ -299,6 +370,20 @@
           </div>
         </div>
 
+        <!-- Feature Driver Breakdown (Explainability & Clinical Attribution) -->
+        <div class="drivers-card glass-panel">
+          <div class="drivers-header">
+            <div>
+              <h4 class="drivers-title"><i class="fa-solid fa-brain"></i> Algorithmic Attribution & Clinical Feature Drivers</h4>
+              <p class="drivers-sub">Normalized physiological deviations driving this specific patient's phenotype assignment relative to cohort median</p>
+            </div>
+            <span class="badge-status online"><i class="fa-solid fa-microchip"></i> Driver Attribution</span>
+          </div>
+          <div class="drivers-grid" id="feature-drivers-container">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+
         <!-- Interactive Visualizations Grid -->
         <div class="viz-grid">
           <!-- Biomarker Radar Chart -->
@@ -323,6 +408,98 @@
             </div>
           </div>
         </div>
+
+        <!-- INTERACTIVE "WHAT-IF" COUNTERFACTUAL INTERVENTION SIMULATOR -->
+        <div class="simulator-card glass-panel" id="simulator-section">
+          <div class="simulator-header">
+            <div>
+              <div class="header-pre"><i class="fa-solid fa-wand-magic-sparkles"></i> Counterfactual Simulation</div>
+              <h3 class="simulator-title">Precision "What-If" Lifestyle & Clinical Intervention Simulator</h3>
+              <p class="simulator-desc">
+                Simulate prospective interventions (weight management, exercise escalation, glycemic lowering) and project real-time risk reduction and potential phenotypic transition on the cohort map.
+              </p>
+            </div>
+            <button id="btn-reset-sim" class="btn btn-secondary btn-sm" type="button"><i class="fa-solid fa-rotate-left"></i> Reset Simulation</button>
+          </div>
+
+          <div class="simulator-layout">
+            <!-- Intervention Sliders -->
+            <div class="sim-controls">
+              
+              <!-- BMI Reduction -->
+              <div class="sim-control-group">
+                <div class="sim-label-row">
+                  <span><i class="fa-solid fa-weight-scale"></i> Weight Loss (BMI Reduction)</span>
+                  <span class="sim-val-tag" id="sim-bmi-val">-3.0 kg/m²</span>
+                </div>
+                <input type="range" id="sim-slider-bmi" min="-8.0" max="0" step="0.5" value="-3.0" class="range-slider">
+                <span class="sim-hint">e.g. Incretin co-agonist, caloric deficit</span>
+              </div>
+
+              <!-- HbA1c Reduction -->
+              <div class="sim-control-group">
+                <div class="sim-label-row">
+                  <span><i class="fa-solid fa-percent"></i> Glycemic Optimization (Δ HbA1c)</span>
+                  <span class="sim-val-tag" id="sim-hba1c-val">-1.2%</span>
+                </div>
+                <input type="range" id="sim-slider-hba1c" min="-3.0" max="0" step="0.1" value="-1.2" class="range-slider">
+                <span class="sim-hint">e.g. SGLT2i / GLP-1 RA / Metformin titration</span>
+              </div>
+
+              <!-- Exercise Increase -->
+              <div class="sim-control-group">
+                <div class="sim-label-row">
+                  <span><i class="fa-solid fa-person-running"></i> Exercise Escalation (Δ Weekly Hrs)</span>
+                  <span class="sim-val-tag" id="sim-exercise-val">+2.0 hrs/wk</span>
+                </div>
+                <input type="range" id="sim-slider-exercise" min="0" max="6.0" step="0.5" value="2.0" class="range-slider">
+                <span class="sim-hint">e.g. Resistance training + brisk cardio</span>
+              </div>
+
+              <!-- Blood Pressure Target -->
+              <div class="sim-control-group">
+                <div class="sim-label-row">
+                  <span><i class="fa-solid fa-heart-pulse"></i> Systolic BP Reduction</span>
+                  <span class="sim-val-tag" id="sim-bp-val">-15 mmHg</span>
+                </div>
+                <input type="range" id="sim-slider-bp" min="-35" max="0" step="1" value="-15" class="range-slider">
+                <span class="sim-hint">e.g. ACEi / ARB therapy + sodium restriction</span>
+              </div>
+
+            </div>
+
+            <!-- Projected Trajectory Output Card -->
+            <div class="sim-result-card">
+              <div class="sim-result-top">
+                <div class="sim-metric-box">
+                  <span class="sim-box-label">Current Risk</span>
+                  <span class="sim-box-val val-current" id="sim-current-risk">68</span>
+                </div>
+                <div class="sim-arrow-divider">
+                  <i class="fa-solid fa-arrow-right-long"></i>
+                </div>
+                <div class="sim-metric-box">
+                  <span class="sim-box-label">Projected Risk</span>
+                  <span class="sim-box-val val-projected" id="sim-projected-risk">38</span>
+                </div>
+              </div>
+
+              <div class="sim-improvement-badge" id="sim-improvement-badge">
+                <i class="fa-solid fa-circle-down"></i> <span id="sim-reduction-text">-44.1% Clinical Severity Reduction</span>
+              </div>
+
+              <div class="sim-transition-box" id="sim-transition-box">
+                <span class="trans-label">Phenotypic Trajectory:</span>
+                <span class="trans-val" id="sim-transition-text">High-Risk SIRD → Transitioned to Mild MOD / Controlled</span>
+              </div>
+
+              <div class="sim-note">
+                <i class="fa-solid fa-circle-info"></i> The trajectory vector on the 2D Cohort Landscape dynamically displays this patient's simulated intervention path.
+              </div>
+            </div>
+          </div>
+        </div>
+
 
         <!-- Tailored Clinical Recommendations & Lifestyle Action Plan -->
         <div class="recommendations-container glass-panel">

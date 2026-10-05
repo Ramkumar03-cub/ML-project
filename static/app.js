@@ -362,16 +362,49 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('rec-exercise').textContent = assessment.recommendations.exercise;
     document.getElementById('rec-monitor').textContent = assessment.recommendations.monitoring;
 
-    // Complications tags
-    const compContainer = document.getElementById('rec-complications');
-    compContainer.innerHTML = assessment.primary_complications
-      .map(c => `<span class="comp-tag" style="background:${assessment.accent_bg}; border-color:${assessment.accent_border}; color:${assessment.color}"><i class="fa-solid fa-triangle-exclamation"></i> ${c}</span>`)
-      .join('');
+    // Render Feature Drivers (Explainability)
+    renderFeatureDrivers(assessment.feature_drivers);
+
+    // Store current state for simulation
+    lastAssessment = assessment;
 
     // Render Charts
     renderRadarChart(assessment);
-    renderPcaChart(assessment);
+    renderPcaChart(assessment, null);
+
+    // Run Intervention Simulation
+    runInterventionSimulation();
   }
+
+  // Render Feature Drivers
+  function renderFeatureDrivers(drivers) {
+    const container = document.getElementById('feature-drivers-container');
+    if (!container || !drivers) return;
+    container.innerHTML = '';
+
+    drivers.forEach(driver => {
+      const item = document.createElement('div');
+      item.className = `driver-item ${driver.is_primary_driver ? 'primary-driver' : ''}`;
+      
+      const zColor = driver.z_score > 0.8 ? '#f43f5e' : (driver.z_score < -0.8 ? '#a855f7' : '#38bdf8');
+      const sign = driver.z_score > 0 ? '+' : '';
+
+      item.innerHTML = `
+        <div>
+          <span class="driver-name">${driver.label}</span>
+          <div class="driver-meta">
+            <span>Value: <strong>${driver.patient_value}</strong></span>
+            <span class="driver-zscore" style="color:${zColor}">${sign}${driver.z_score}σ (${driver.status})</span>
+          </div>
+        </div>
+        <div class="driver-bar-track">
+          <div class="driver-bar-fill" style="width:${driver.impact_pct}%; background:${zColor}"></div>
+        </div>
+      `;
+      container.appendChild(item);
+    });
+  }
+
 
   // Biomarker Radar Chart
   function renderRadarChart(assessment) {
@@ -461,8 +494,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // PCA Cohort Scatter Chart
-  function renderPcaChart(assessment) {
+  // PCA Cohort Scatter Chart with Patient Position and Simulated Trajectory
+  function renderPcaChart(assessment, projected = null) {
     if (!cohortData) return;
     const ctx = document.getElementById('pcaChart').getContext('2d');
 
@@ -496,7 +529,7 @@ document.addEventListener('DOMContentLoaded', () => {
       };
     });
 
-    // Add current patient point as a highlighted crosshair point
+    // Current patient dataset
     const patientDataset = {
       label: `Current Patient (${assessment.cluster_code})`,
       data: [{
@@ -511,11 +544,44 @@ document.addEventListener('DOMContentLoaded', () => {
       pointStyle: 'circle'
     };
 
+    const datasets = [...clusterDatasets, patientDataset];
+
+    // If projected simulation exists, add projected point and trajectory vector
+    if (projected && projected.pca) {
+      const projectedDataset = {
+        label: `Projected Trajectory (${projected.cluster_code})`,
+        data: [{
+          x: projected.pca.x,
+          y: projected.pca.y
+        }],
+        backgroundColor: '#10b981',
+        borderColor: '#ffffff',
+        borderWidth: 2,
+        pointRadius: 9,
+        pointHoverRadius: 12,
+        pointStyle: 'triangle'
+      };
+
+      const trajectoryLineDataset = {
+        label: 'Trajectory Path',
+        data: [
+          { x: assessment.pca_coordinates.x, y: assessment.pca_coordinates.y },
+          { x: projected.pca.x, y: projected.pca.y }
+        ],
+        showLine: true,
+        borderColor: '#10b981',
+        borderDash: [6, 4],
+        borderWidth: 2,
+        fill: false,
+        pointRadius: 0
+      };
+
+      datasets.push(projectedDataset, trajectoryLineDataset);
+    }
+
     pcaChartInstance = new Chart(ctx, {
       type: 'scatter',
-      data: {
-        datasets: [...clusterDatasets, patientDataset]
-      },
+      data: { datasets },
       options: {
         responsive: true,
         maintainAspectRatio: false,
@@ -554,8 +620,11 @@ document.addEventListener('DOMContentLoaded', () => {
           tooltip: {
             callbacks: {
               label: (ctx) => {
-                if (ctx.datasetIndex === 4) {
+                if (ctx.dataset.label.includes('Current Patient')) {
                   return `★ Current Patient: Assigned to ${assessment.cluster_code}`;
+                }
+                if (ctx.dataset.label.includes('Projected Trajectory')) {
+                  return `▲ Projected Target: Shifted to ${projected.cluster_code}`;
                 }
                 const pt = ctx.raw;
                 return `${ctx.dataset.label}: Age ${pt.age} | BMI ${pt.bmi} | A1c ${pt.hba1c}%`;
@@ -564,6 +633,109 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
       }
+    });
+  }
+
+  // Counterfactual Intervention Simulation
+  let simDebounceTimer = null;
+  async function runInterventionSimulation() {
+    if (!lastAssessment) return;
+
+    const bmiDelta = parseFloat(document.getElementById('sim-slider-bmi').value) || 0;
+    const a1cDelta = parseFloat(document.getElementById('sim-slider-hba1c').value) || 0;
+    const exerciseDelta = parseFloat(document.getElementById('sim-slider-exercise').value) || 0;
+    const bpDelta = parseFloat(document.getElementById('sim-slider-bp').value) || 0;
+
+    // Update slider label tags
+    document.getElementById('sim-bmi-val').textContent = `${bmiDelta >= 0 ? '+' : ''}${bmiDelta.toFixed(1)} kg/m²`;
+    document.getElementById('sim-hba1c-val').textContent = `${a1cDelta >= 0 ? '+' : ''}${a1cDelta.toFixed(1)}%`;
+    document.getElementById('sim-exercise-val').textContent = `+${exerciseDelta.toFixed(1)} hrs/wk`;
+    document.getElementById('sim-bp-val').textContent = `${bpDelta >= 0 ? '+' : ''}${Math.round(bpDelta)} mmHg`;
+
+    const currentPatient = {
+      age: parseFloat(inputs.age.num.value),
+      bmi: parseFloat(inputs.bmi.num.value),
+      fasting_glucose: parseFloat(inputs.glucose.num.value),
+      hba1c: parseFloat(inputs.hba1c.num.value),
+      fasting_insulin: parseFloat(inputs.insulin.num.value),
+      systolic_bp: parseFloat(inputs.sysbp.num.value),
+      diastolic_bp: parseFloat(inputs.diabp.num.value),
+      physical_activity_hours: parseFloat(inputs.activity.num.value)
+    };
+
+    const payload = {
+      patient: currentPatient,
+      deltas: {
+        bmi_delta: bmiDelta,
+        hba1c_delta: a1cDelta,
+        glucose_delta: a1cDelta * 22.0, // Clinical empirical correlation
+        exercise_delta: exerciseDelta,
+        bp_delta: bpDelta
+      }
+    };
+
+    try {
+      const res = await fetch('/api/simulate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!data.success) return;
+
+      const sim = data.simulation;
+      document.getElementById('sim-current-risk').textContent = sim.baseline.risk_score;
+      document.getElementById('sim-projected-risk').textContent = sim.projected.risk_score;
+      
+      const badgeEl = document.getElementById('sim-improvement-badge');
+      if (sim.risk_delta < 0) {
+        badgeEl.style.background = 'rgba(16, 185, 129, 0.15)';
+        badgeEl.style.borderColor = 'rgba(16, 185, 129, 0.35)';
+        badgeEl.style.color = '#10b981';
+        document.getElementById('sim-reduction-text').textContent = `-${sim.percent_risk_reduction}% Severity Risk Reduction (Δ ${sim.risk_delta} pts)`;
+      } else {
+        badgeEl.style.background = 'rgba(244, 63, 94, 0.15)';
+        badgeEl.style.borderColor = 'rgba(244, 63, 94, 0.35)';
+        badgeEl.style.color = '#f43f5e';
+        document.getElementById('sim-reduction-text').textContent = `Neutral / Baseline`;
+      }
+
+      // Transition text
+      const transText = document.getElementById('sim-transition-text');
+      if (sim.is_phenotype_transitioned) {
+        transText.innerHTML = `<span style="color:#10b981">★ Transformed from ${sim.baseline.cluster_code} to ${sim.projected.cluster_name} (${sim.projected.cluster_code})</span>`;
+      } else {
+        transText.textContent = `Remains ${sim.baseline.cluster_name} with improved metabolic reserve`;
+      }
+
+      // Update PCA map with projected vector
+      renderPcaChart(lastAssessment, sim.projected);
+
+    } catch (err) {
+      console.error('Error running simulation:', err);
+    }
+  }
+
+  // Hook up simulator slider inputs
+  ['sim-slider-bmi', 'sim-slider-hba1c', 'sim-slider-exercise', 'sim-slider-bp'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('input', () => {
+        clearTimeout(simDebounceTimer);
+        simDebounceTimer = setTimeout(runInterventionSimulation, 150);
+      });
+    }
+  });
+
+  // Reset simulation button
+  const btnResetSim = document.getElementById('btn-reset-sim');
+  if (btnResetSim) {
+    btnResetSim.addEventListener('click', () => {
+      document.getElementById('sim-slider-bmi').value = -3.0;
+      document.getElementById('sim-slider-hba1c').value = -1.2;
+      document.getElementById('sim-slider-exercise').value = 2.0;
+      document.getElementById('sim-slider-bp').value = -15;
+      runInterventionSimulation();
     });
   }
 

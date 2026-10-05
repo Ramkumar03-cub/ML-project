@@ -113,6 +113,17 @@ def get_cohort_data():
 def get_presets():
     return SAMPLE_PRESETS
 
+class InterventionDeltas(BaseModel):
+    bmi_delta: float = 0.0
+    hba1c_delta: float = 0.0
+    glucose_delta: float = 0.0
+    bp_delta: float = 0.0
+    exercise_delta: float = 0.0
+
+class InterventionSimulationRequest(BaseModel):
+    patient: PatientAssessmentRequest
+    deltas: InterventionDeltas
+
 @app.post("/api/assess")
 def assess_patient_endpoint(patient: PatientAssessmentRequest):
     try:
@@ -124,6 +135,28 @@ def assess_patient_endpoint(patient: PatientAssessmentRequest):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/simulate")
+def simulate_intervention_endpoint(req: InterventionSimulationRequest):
+    try:
+        result = profiling_engine.simulate_intervention(req.patient.model_dump(), req.deltas.model_dump())
+        return {
+            "success": True,
+            "simulation": result
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/download-cohort")
+def download_cohort_endpoint():
+    from fastapi.responses import Response
+    csv_data = profiling_engine.get_cohort_csv()
+    return Response(
+        content=csv_data,
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=diabetes_phenotypes_cohort.csv"}
+    )
+
 
 # Mount static assets
 static_dir = os.path.join(os.path.dirname(__file__), "static")
